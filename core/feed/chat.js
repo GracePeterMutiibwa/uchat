@@ -422,7 +422,7 @@ function loadRequirements() {
 
     const chatbotLink = document.createElement('link');
 
-    chatbotLink.href = 'https://uchat.pythonanywhere.com/static/_uc/ubot.css';
+    chatbotLink.href = 'https://many-erica-uchat-f5b163ee.koyeb.app/static/_uc/ubot.css';
 
     chatbotLink.rel = 'stylesheet';
 
