@@ -1,0 +1,36 @@
+.uc-toast {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  display: block;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 4px;
+  animation: slideIn 0.3s ease;
+  z-index: 2000;
+  font-family: inherit;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.uc-toast.success {
+  background: #27c93f;
+}
+
+.uc-toast.primary {
+  background: #42a5f5;
+}
+
+.uc-toast.danger {
+  background: #ff5500;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

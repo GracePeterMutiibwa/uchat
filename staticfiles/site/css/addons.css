@@ -1,0 +1,169 @@
+* {
+  font-family: "Outfit", serif !important;
+}
+
+.uc-dark {
+  background-color: #151528 !important;
+}
+
+.btn,
+.card,
+.input-group-text,
+textarea,
+input {
+  border-radius: 2px !important;
+}
+
+input[type="checkbox"] {
+  border-radius: 2rem !important;
+}
+
+.site-text {
+  font-size: 1rem;
+}
+
+.no-cursor {
+  cursor: default !important;
+}
+
+.bg-valid {
+  background-color: #d1e7dd !important;
+}
+
+.bg-invalid {
+  background-color: #f8d7da !important;
+}
+
+.bg-black {
+  background-color: black !important;
+}
+
+.offcanvas-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.bt-close {
+  width: 40px;
+
+  height: 40px;
+
+  border-radius: 50%;
+
+  background-color: #007bff;
+
+  color: white;
+
+  border: none;
+
+  font-size: 18px;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.bt-close:hover {
+  background-color: #0056b3;
+}
+
+.bt-close:focus {
+  outline: none;
+
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
+}
+
+.text-success {
+  color: #098842 !important;
+}
+
+.bg-success,
+.alert-success {
+  background-color: #098842 !important;
+}
+
+.text-warning {
+  color: #ff7400 !important;
+}
+
+.alert-warning,
+.bg-warning {
+  background-color: #ff7400 !important;
+}
+
+.text-danger {
+  color: #ff0000 !important;
+}
+
+.alert-danger,
+.bg-danger {
+  background-color: #830a3e !important;
+}
+
+.fill-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.bg-image-container {
+  width: 100%;
+  max-height: 20rem;
+  overflow: hidden;
+  border-radius: 30;
+}
+
+.square-image-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%; /* Creates a square aspect ratio */
+  overflow: hidden;
+}
+
+.square-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.overlay-trigger {
+  position: relative;
+  display: block;
+}
+
+.image-edit-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.image-edit-overlay.round {
+  border-radius: 50%;
+}
+
+.image-edit-overlay i {
+  color: white;
+  font-size: 2rem;
+}
+
+.image-edit-overlay:hover {
+  opacity: 1;
+}

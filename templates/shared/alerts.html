@@ -1,0 +1,11 @@
+{% if messages %}
+  {% for eachMessage in messages %}
+    <div role="alert" class="alert {% if eachMessage.tags %}{{ eachMessage.tags }}{% endif %} alert-dismissible border-bottom rounded-0 mb-0">
+      <div class="d-flex justify-content-center">
+        <span class="text-white">{{ eachMessage }}</span>
+      </div>
+
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+{% endif %}

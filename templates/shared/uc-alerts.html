@@ -1,0 +1,8 @@
+{% if messages %}
+  {% for eachMessage in messages %}
+    <div class="custom-alert custom-alert-orange">
+      <div class="custom-alert-content">{{ eachMessage }}</div>
+      <button class="custom-alert-close">×</button>
+    </div>
+  {% endfor %}
+{% endif %}

@@ -1,0 +1,58 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Uchat 🚀</title>
+
+    {% include 'shared/shared-meta.html' %}
+
+    <link rel="stylesheet" href="{% static 'public/css/home.css' %}" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="{% url 'uc:home' %}" class="logo">
+        <i class="bx bxs-message-square-dots bx-tada"></i>
+        Uchat
+      </a>
+
+      {% if request.user.is_authenticated %}
+        <a data-tippy-content="Access dashboard" href="{% url 'uc:router' %}" style="background-color: #1e1e2e !important; color:white !important;" class="login-btn">
+          <i class="bx bx-chevron-right"></i>
+          Account
+        </a>
+      {% else %}
+        <a data-tippy-content="Login" href="{% url 'uc:login' %}" class="login-btn">
+          <i class="bx bx-log-in-circle"></i>
+          Login
+        </a>
+      {% endif %}
+    </nav>
+
+    <main class="main-content">
+      <img src="{% static 'images/svg/chat-icon.svg' %}" alt="Uchat Profile" class="profile-image" />
+      <div class="description">
+        <div class="circles">
+          <div class="circle circle-red"></div>
+          <div class="circle circle-yellow"></div>
+          <div class="circle circle-green"></div>
+        </div>
+        <div class="code-content">
+          Welcome to Uchat; a platform, that offers
+          <span class="main-blue">AI Solutions</span> that integrate with your business system based on your business data.
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <i class="bx bx-copyright"></i>
+      2025 Uchat. All rights reserved.
+    </footer>
+
+    <script src="{% static 'site/js/jquery.min.js' %}"></script>
+
+    {% include 'shared/tippy.html' %}
+  </body>
+</html>

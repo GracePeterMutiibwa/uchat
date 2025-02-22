@@ -1,0 +1,698 @@
+{% extends 'shared/uchat-base.html' %}
+
+{% load static %}
+
+{% block page_css %}
+  <link rel="stylesheet" href="{% static 'conf/configure.css' %}" />
+
+  <link rel="stylesheet" href="{% static 'stall/ucstall.css' %}" />
+{% endblock %}
+
+{% block page_navigation %}
+  <div class="d-flex align-items-center justify-content-between border-bottom py-2 uc-dark">
+    <a href="{% url 'uc:logout' %}" class="btn btn-soft-secondary mx-2"><i class="bx bxs-log-out me-1"></i>Logout</a>
+
+    <div class="dropdown">
+      <span data-bs-toggle="dropdown" class="avatar avatar-light avatar-circle cursor-pointer mx-2"><span class="avatar-initials"><i class="bx bxs-cog"></i></span></span>
+
+      <div class="dropdown-menu">
+        <a href="#" data-tippy-content="Update RAG & scrapping API settings" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#api-root-modal"><i class="bi bi-link me-1"></i>RAG & Scrapper Settings</a>
+
+        <div class="dropdown-divider"></div>
+
+        <a class="dropdown-item" data-tippy-content="Update Password" data-bs-toggle="offcanvas" data-bs-target="#password-offcanvas" href="#"><i class="bx bxs-key me-1"></i>Change Password</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block page_content %}
+  <ul class="nav nav-segment nav-fill mb-7" role="tablist">
+    <li class="nav-item" role="presentation">
+      <a class="nav-link active" href="#dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard-tab" role="tab" tabindex="-1"><i class="bx bx-slider me-1 text-secondary"></i>Configure</a>
+    </li>
+
+    <li class="nav-item" role="presentation">
+      <a class="nav-link" href="#collections-tab" data-bs-toggle="tab" data-bs-target="#collections-tab" role="tab" tabindex="-1"><i class="bi bi-archive-fill me-1 text-secondary"></i>Collections</a>
+    </li>
+  </ul>
+
+  <div class="container">
+    <div class="tab-content">
+      <div class="tab-pane fade active show" id="dashboard-tab" role="tabpanel">
+        <div class="mb-5">
+          <div class="accordion accordion-flush bg-light mb-5" id="new-chatbot-accordion">
+            <div class="accordion-item">
+              <div class="accordion-header">
+                <a class="accordion-button collapsed text-primary" role="button" data-bs-toggle="collapse" data-bs-target="#chat-new-acc"><i class="bi bi-node-plus-fill me-1"></i>New Chatbot</a>
+              </div>
+              <div id="chat-new-acc" class="accordion-collapse collapse show" data-bs-parent="#new-chatbot-accordion">
+                <div class="accordion-body">
+                  <div class="card card-bordered shadow-none">
+                    <div class="p-2 bg-light border-bottom">
+                      <span class="form-text">Click any node to adjust</span>
+                    </div>
+
+                    <div class="card-body bg-light p-0" style="height: 340px !important; overflow: hidden;">
+                      {% include 'control/configure.html' %}
+                    </div>
+
+                    <div class="card-body py-2 border-top">
+                      <div id="has-steps" data-tippy-content="Track configuration completeness" class="w-100"></div>
+                    </div>
+
+                    <div class="card-footer border-top">
+                      <form method="post" action="{% url 'uc:manage-configuration' %}">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                          <label for="bot-label-input" class="form-label"><i class="bi bi-star-fill me-1 text-warning"></i>ChatBot Label (name)</label>
+
+                          <textarea name="bot-label" class="form-control" placeholder="A name for the chatbot" rows="1" id="bot-label-input" required></textarea>
+
+                          <span class="form-text">Use a descriptive label</span>
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="bot-avatar-input" class="form-label"><i class="bi bi-link-45deg me-1 text-secondary"></i>Avatar Link</label>
+
+                          <input name="bot-avatar" type="text" class="form-control" placeholder="Link for image that will be shown on the ChatBot" rows="1" id="bot-avatar-input" required />
+
+                          <span class="form-text">Use a Valid Link</span>
+                        </div>
+
+                        <input type="hidden" name="bot" id="what-source-tag-input" value="new" />
+
+                        <input type="hidden" name="prompt" id="bot-prompt-input" value="" />
+
+                        <input type="hidden" name="sources" value="" id="selected-sources-holder" />
+
+                        {% if api_key %}
+                          <div class="d-flex justify-content-end">
+                            <button data-tippy-content="Save Chatbot Configuration" id="save-chatbot-trigger" class="btn btn-info" type="submit" disabled><i class="bx bxs-save me-1"></i>Save Instance</button>
+                          </div>
+                        {% else %}
+                          {% include 'shared/rag-scrapper-settings.html' %}
+                        {% endif %}
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-bordered shadow-none mb-5">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-12">
+                <div class="d-md-flex justify-content-between">
+                  <h5 class="fw-bold text-secondary"><i class="bx bx-loader-alt bx-spin me-1 text-success"></i> ChatBots</h5>
+                </div>
+              </div>
+            </div>
+
+            <hr />
+
+            <div class="row gx-3">
+              <div class="col-12 mb-4">
+                {% if available_bots %}
+                  <div class="table-responsive-md">
+                    <table class="table">
+                      <thead class="thead-light">
+                        <tr>
+                          sources<th scope="col">
+                            <i class="bx bxs-circle text-secondary"></i>
+                          </th>
+                          <th scope="col">
+                            <i class="bi bi-calendar3-range-fill text-warning me-1"></i>Last Updated
+                          </th>
+                          <th scope="col">
+                            <i class="bx bx-chevron-right me-1"></i>Label
+                          </th>
+                          <th scope="col">
+                            <i class="bi bi-database-gear me-1"></i> Sources
+                          </th>
+                          <th scope="col">
+                            <i class="bx bxs-cog me-1"></i>Manage
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for eachBot in available_bots %}
+                          <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td>{{ eachBot.created }}</td>
+                            <td>
+                              <span class="badge bg-soft-secondary text-secondary">{{ eachBot.label }}</span>
+                            </td>
+                            <td>
+                              <span data-tippy-content="> {{ eachBot.src_label }}" class="badge bg-success rounded-pill">{{ eachBot.sources }}</span>
+                            </td>
+                            <td>
+                              <div class="dropdown">
+                                <span data-bs-toggle="dropdown" class="cursor-pointer"><i class="bx bx-dots-horizontal-rounded"></i></span>
+
+                                <div class="dropdown-menu">
+                                  <a class="dropdown-item" data-tippy-content="Experiment with chatbot" href="#"><i class="bi bi-eye me-1"></i>Preview</a>
+
+                                  <div class="dropdown-divider"></div>
+
+                                  <a class="dropdown-item share-trigger" data-bot-tag="{{ eachBot.tag }}" data-bs-toggle="modal" data-bs-target="#bot-share-modal" data-bot-slug="{{ eachBot.slug }}" data-tippy-content="Get Embed Snippet" href="#"><i class="bi bi-share me-1"></i>Share</a>
+
+                                  <div class="dropdown-divider"></div>
+
+                                  <a class="dropdown-item bot-editor" data-bot-avatar="{{ eachBot.avatar }}" data-bot-tag="{{ eachBot.tag }}" data-bot-src="{{ eachBot.src }}" data-bot-label="{{ eachBot.label }}" data-bot-prompt="{{ eachBot.prompt }}" data-tippy-content="Edit Chat Bot Configuration" href="#"><i class="bx bxs-message-square-edit me-1"></i>Edit</a>
+
+                                  <div class="dropdown-divider"></div>
+
+                                  <a data-tippy-content="Delete: {{ eachBot.label }}" class="dropdown-item" href="{% url 'uc:trash-bot' eachBot.tag %}"><i class="bx bxs-trash me-1"></i>Delete</a>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  {% with display_message='No ChatBots' %}
+                    {% include 'shared/empty-show.html' %}
+                  {% endwith %}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="collections-tab" role="tabpanel">
+        <div class="card card-bordered shadow-none mb-5">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-12">
+                <div class="d-md-flex justify-content-between">
+                  <h5 class="fw-bold mb-3 mb-md-0 text-secondary"><i class="bi bi-database-fill-check me-1"></i>Data Sources</h5>
+
+                  <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">Add Data Source</button>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item" data-bs-toggle="offcanvas" data-bs-target="#paste-from-clip-offcanvas" data-tippy-content="Paste content from clipboard" href="#"><i class="bx bxs-copy me-1"></i>Text From ClipBoard</a>
+
+                      <div class="dropdown-divider"></div>
+
+                      <a class="dropdown-item" data-tippy-content="Text Extracted from Webpage as is" data-bs-toggle="offcanvas" data-bs-target="#url-source-offcanvas" href="#"><i class="bx bxs-file-html me-1"></i>All Text In Web Page</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr />
+
+            <div class="row">
+              <div class="col-12">
+                {% if present_sources %}
+                  <div class="accordion accordion-flush" id="data-sources-pool">
+                    {% for eachSource in present_sources %}
+                      <div class="accordion-item">
+                        <div class="accordion-header">
+                          <a class="accordion-button collapsed" data-tippy-content="Expand: {{ eachSource.label }}" role="button" data-bs-toggle="collapse" data-bs-target="#{{ eachSource.tag }}">
+                            {% if eachSource.type == 1 %}
+                              <i class="bi bi-clipboard-check-fill me-1"></i>
+                            {% else %}
+                              <i class="bi bi-layout-text-window me-1"></i>
+                            {% endif %}
+                            {{ eachSource.label }}
+                          </a>
+                        </div>
+                        <div id="{{ eachSource.tag }}" class="accordion-collapse collapse" data-bs-parent="#data-sources-pool">
+                          <div class="accordion-body">
+                            <div class="card card-bordered shadow-none">
+                              <div class="card-body">
+                                <div class="d-flex justify-content-end">
+                                  <div class="dropdown">
+                                    <span data-bs-toggle="dropdown" class="cursor-pointer"><i class="bx bx-dots-horizontal-rounded"></i></span>
+
+                                    <div class="dropdown-menu">
+                                      <a class="dropdown-item ext-trigger" data-src-type="{{ eachSource.type }}" data-src-tag="{{ eachSource.tag }}" data-src-label="{{ eachSource.label }}" data-src-content="{{ eachSource.content }}" data-tippy-content="Edit Source" href="#"><i class="bx bxs-message-square-edit me-1"></i>Edit</a>
+
+                                      {% if eachSource.usage == 0 %}
+                                        <div class="dropdown-divider"></div>
+
+                                        <a class="dropdown-item" data-tippy-content="Delete this Source" href="{% url 'uc:trash-source' eachSource.tag %}"><i class="bx bxs-trash-alt me-1"></i>Delete</a>
+                                      {% endif %}
+                                    </div>
+                                  </div>
+                                </div>
+                                <p>{{ eachSource.content }}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  {% with display_message='No external sources added yet' %}
+                    {% include 'shared/empty-show.html' %}
+                  {% endwith %}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-bordered shadow-none mb-5">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-12">
+                <div class="d-md-flex justify-content-between">
+                  <h5 class="fw-bold mb-3 mb-md-0 text-secondary"><i class="bx bxs-dashboard me-1"></i>Primary Cache</h5>
+
+                  {% if api_key %}
+                    <div class="dropdown">
+                      <button data-bs-toggle="dropdown" data-tippy-content="Retrieve current information" class="btn btn-soft-info btn-sm dropdown-toggle" href="#"><i class="bx bx-loader-alt bx-spin-hover me-1"></i> Refresh Cache</button>
+
+                      <div class="dropdown-menu">
+                        <a href="#" data-cache-tag="program" data-tippy-content="Fetch programs info again" class="dropdown-item cache-reload"><i class="bi bi-app-indicator me-1"></i>Programs</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a data-cache-tag="timetable" class="dropdown-item cache-reload" data-tippy-content="Fetch timetable info again" href="#"><i class="bi bi-table me-1"></i>Time Table</a>
+                      </div>
+                    </div>
+                  {% else %}
+                    {% include 'shared/rag-scrapper-settings.html' %}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <hr />
+
+            <div class="row">
+              <div class="col-12">
+                <div class="accordion accordion-flush" id="cache-acc">
+                  <div class="accordion-item">
+                    <div class="accordion-header">
+                      <a class="accordion-button collapsed" data-tippy-content="Programs Data" role="button" data-bs-toggle="collapse" data-bs-target="#programs-cache">Programs Data (Used by: {{ cache_metrics.programs }} <i class="bx bxs-bot ms-1 text-warning"></i>)</a>
+                    </div>
+                    <div id="programs-cache" class="accordion-collapse collapse" data-bs-parent="#cache-acc">
+                      <div class="accordion-body">
+                        {% if present_programs %}
+                          <div class="table-responsive">
+                            <table class="table w-100" id="programs-table">
+                              <thead class="thead-light">
+                                <tr>
+                                  <th scope="col">#</th>
+                                  <th scope="col">Program</th>
+                                  <th scope="col">Code</th>
+                                  <th scope="col">Mode</th>
+                                  <th scope="col">Duration</th>
+                                  <th scope="col">Link</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for eachProgram in present_programs %}
+                                  <tr>
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{ eachProgram.name }}</td>
+                                    <td>{{ eachProgram.code }}</td>
+                                    <td>{{ eachProgram.mode }}</td>
+                                    <td>{{ eachProgram.duration }}</td>
+                                    <td>
+                                      <a target="_blank" data-tippy-content="View: {{ eachProgram.name }}" href="{{ eachProgram.link }}" class="btn"><i class="bi bi-box-arrow-up-right"></i></a>
+                                    </td>
+                                  </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                          </div>
+                        {% else %}
+                          {% with display_message='Please Refresh the Program Cache' %}
+                            {% include 'shared/empty-show.html' %}
+                          {% endwith %}
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="accordion-item">
+                    <div class="accordion-header">
+                      <a class="accordion-button collapsed" data-tippy-content="TimeTable Data" role="button" data-bs-toggle="collapse" data-bs-target="#timetable-cache">TimeTable Data (Used by: {{ cache_metrics.timetable }} <i class="bx bxs-bot ms-1 text-warning"></i>)</a>
+                    </div>
+                    <div id="timetable-cache" class="accordion-collapse collapse" data-bs-parent="#cache-acc">
+                      <div class="accordion-body">
+                        {% if present_lectures %}
+                          <div class="table-responsive">
+                            <table class="table w-100" id="lectures-table">
+                              <thead class="thead-light">
+                                <tr>
+                                  <th scope="col">#</th>
+                                  <th scope="col">Year</th>
+                                  <th scope="col">Program</th>
+                                  <th scope="col">Day</th>
+                                  <th scope="col">Duration</th>
+                                  <th scope="col">particulars</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for eachLecture in present_lectures %}
+                                  <tr>
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>
+                                      <span class="badge bg-soft-secondary text-secondary">{{ eachLecture.year }}</span>
+                                    </td>
+                                    <td>{{ eachLecture.program }}</td>
+                                    <td class="bg-info text-white">{{ eachLecture.day }}</td>
+                                    <td>{{ eachLecture.duration }}</td>
+                                    <td class="bg-light">{{ eachLecture.particulars }}</td>
+                                  </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                          </div>
+                        {% else %}
+                          {% with display_message='Please Refresh the TimeTable Cache' %}
+                            {% include 'shared/empty-show.html' %}
+                          {% endwith %}
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="bot-share-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header border-bottom py-3">
+          <h5 class="modal-title text-secondary"><i class="bi bi-share-fill me-1"></i>Share Bot</h5>
+
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" id="bot-share-tag-input" />
+
+          <div class="mb-4">
+            <label for="display-position-input" class="form-label">How to display?</label>
+
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-distribute-vertical"></i></span>
+
+              <select class="form-select" data-tippy-content="Display Position" id="display-position-input" required>
+                <option value="1">Bottom Left</option>
+                <option value="2">Bottom Right</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <textarea class="form-control bg-light" rows="4" id="code-snippet-holder" readonly></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer d-flex justify-content-between py-3">
+          <button type="button" class="btn btn-white" data-bs-dismiss="modal">Close</button>
+
+          <button type="button" data-bs-dismiss="modal" data-tippy-content="Copy Snippet" data-to-copy="#code-snippet-holder" class="btn btn-warning copy-trigger"><i class="bi bi-copy me-1"></i>Copy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="prompt-entry-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header border-bottom py-3">
+          <h5 class="modal-title"><i class="bi bi-pin-angle-fill me-1 text-secondary"></i>Prompt Manager</h5>
+
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="">
+            <label for="prompt-capture-input" class="form-label"><i class="bi bi-patch-question-fill me-1"></i>System Prompt</label>
+
+            <textarea class="form-control ext-clean" placeholder="Provide a system prompt" rows="6" id="prompt-capture-input" required></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer d-flex justify-content-between">
+          <button type="button" class="btn btn-white" data-bs-dismiss="modal">Close</button>
+
+          <button type="button" id="add-prompt-button" data-bs-dismiss="modal" data-tippy-content="Add prompt to workflow" class="btn data text-white"><i class="bi bi-check2-all me-1"></i>Add Prompt</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="sources-choice-offcanvas">
+    <div class="offcanvas-header border-bottom">
+      <h5 class="offcanvas-title text-secondary"><i class="bi bi-node-plus-fill me-1 text-secondary"></i>Choose Sources</h5>
+
+      <button type="button" class="bt-close" data-bs-dismiss="offcanvas">&times;</button>
+    </div>
+    <div class="offcanvas-body px-4">
+      {% if present_sources %}
+        <div class="accordion accordion-flush" id="data-sources-pool">
+          {% for eachSource in present_sources %}
+            <div class="card card-sm shadow-none card-bordered mb-4">
+              <div class="card-body">
+                <div class="row align-items-between">
+                  <div class="col-7">
+                    <h5 class="card-title text-inherit"><i class="bi bi-plus-circle-fill me-1 text-secondary"></i>{{ eachSource.label }}</h5>
+                    <p class="card-text text-body small">{{ eachSource.date }}</p>
+                  </div>
+
+                  <div class="col-auto">
+                    <div data-tippy-content="Add: {{ eachSource.label }}" class="form-check form-switch">
+                      <input data-src-tag="{{ eachSource.tag }}" type="checkbox" class="form-check-input source-add" id="switch-add-{{ eachSource.tag }}" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+
+          <hr />
+
+          <div class="mb-4">
+            {% if present_programs %}
+              <div class="card card-sm shadow-none card-bordered mb-4">
+                <div class="card-body bg-light">
+                  <div class="row align-items-between">
+                    <div class="col-7">
+                      <h5 class="card-title text-inherit"><i class="bi bi-plus-circle-fill me-1 text-secondary"></i>Programs Data</h5>
+                      <p class="card-text text-body small">---</p>
+                    </div>
+
+                    <div class="col-auto">
+                      <div data-tippy-content="Add: Program Data" class="form-check form-switch">
+                        <input type="checkbox" data-src-tag="programs" class="form-check-input source-add" id="switch-add-programs" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+
+            {% if present_lectures %}
+              <div class="card card-sm shadow-none card-bordered mb-4">
+                <div class="card-body bg-light">
+                  <div class="row align-items-between">
+                    <div class="col-7">
+                      <h5 class="card-title text-inherit"><i class="bi bi-plus-circle-fill me-1 text-secondary"></i>TimeTable Data</h5>
+                      <p class="card-text text-body small">---</p>
+                    </div>
+
+                    <div class="col-auto">
+                      <div data-tippy-content="Add: TimeTable Data" class="form-check form-switch">
+                        <input type="checkbox" data-src-tag="timetable" class="form-check-input source-add" id="switch-add-timetable" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% else %}
+        <div class="py-4">
+          {% with display_message='No sources found' %}
+            {% include 'shared/empty-show.html' %}
+          {% endwith %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="modal fade" id="api-root-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <form method="post" action="{% url 'uc:manage-endpoint' %}" class="modal-content">
+        {% csrf_token %}
+
+        <div class="modal-header border-bottom py-3">
+          <h5 class="modal-title text-secondary">RAG & Scrapper Manager</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          {% csrf_token %}
+
+          <div class="mb-4">
+            <label for="api-endpoint-input" class="form-label"><i class="bx bxs-link me-1"></i>API Endpoint URL</label>
+
+            <input type="text" value="{{ api_url }}" name="api-endpoint" class="form-control" placeholder="Link for scrapping API" id="api-endpoint-input" required />
+          </div>
+
+          <div class="mb-4">
+            <label for="api-key-input" class="form-label"><i class="bi bi-file-earmark-lock2-fill me-1"></i>RAG API Key</label>
+
+            <input type="text" value="{{ api_key }}" name="api-key" class="form-control" placeholder="Cohere API Key" id="api-key-input" required />
+          </div>
+
+          <div class="mb-4">
+            <label for="scrap-key-input" class="form-label"><i class="bi bi-key me-1"></i>Scrapping API key</label>
+
+            <input type="text" value="{{ scrap_key }}" name="scrap-key" class="form-control" placeholder="API key for Scrapper" id="scrap-key-input" required />
+          </div>
+        </div>
+
+        <div class="modal-footer py-3">
+          <button type="button" class="btn btn-white" data-bs-dismiss="modal">Close</button>
+
+          <button type="submit" data-tippy-content="Save new API Url" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="url-source-offcanvas">
+    <div class="offcanvas-header border-bottom">
+      <h5 class="offcanvas-title text-secondary"><i class="bx bx-lin me-1 text-secondary"></i>Url Text (Source)</h5>
+
+      <button type="button" class="bt-close" data-bs-dismiss="offcanvas">&times;</button>
+    </div>
+    <div class="offcanvas-body px-4">
+      <form action="{% url 'uc:manage-external' %}" method="post" class="mb-5">
+        {% csrf_token %}
+
+        <input type="hidden" name="type" value="2" />
+
+        <input type="hidden" name="status" value="new" id="url-tag-input" />
+
+        <div class="mb-4">
+          <label for="url-source-label-input" class="form-label"><i class="bx bxs-label me-1"></i>Source Label</label>
+
+          <input type="text" name="source-label" class="form-control ext-clean" placeholder="Label for the datasource" id="url-source-label-input" required />
+
+          <span class="form-text">Use a descriptive label</span>
+        </div>
+
+        <div class="mb-4">
+          <label for="url-source-input" class="form-label"><i class="bx bxs-label me-1"></i>Url for the Webpage</label>
+
+          <input type="text" class="form-control ext-clean" placeholder="Source URL" id="url-source-input" />
+
+          <span class="form-text">It should be a valid url</span>
+        </div>
+
+        <div class="mb-4">
+          {% if api_url %}
+            <div class="d-flex justify-content-end">
+              <button type="button" class="btn btn-secondary btn-sm url-trigger" data-url-source="#url-source-input" data-load-area="#url-data-input"><i class="bi bi-funnel-fill me-1"></i>Extract</button>
+            </div>
+          {% else %}
+            {% include 'shared/rag-scrapper-settings.html' %}
+          {% endif %}
+
+          <label for="url-data-input" class="form-label"><i class="bx bxs-data me-1"></i>Data</label>
+
+          <textarea class="form-control ext-clean" name="source-content" placeholder="Data from url source" rows="5" id="url-data-input" required></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end">
+          <button data-tippy-content="Save as Source" class="btn btn-soft-info" type="submit"><i class="bx bxs-save me-1"></i>Save Source</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="paste-from-clip-offcanvas">
+    <div class="offcanvas-header border-bottom">
+      <h5 class="offcanvas-title text-secondary"><i class="bx bx-clipboard me-1 text-secondary"></i>ClipBoard (Source)</h5>
+
+      <button type="button" class="bt-close" data-bs-dismiss="offcanvas">&times;</button>
+    </div>
+    <div class="offcanvas-body px-4">
+      <form action="{% url 'uc:manage-external' %}" method="post" class="mb-5">
+        {% csrf_token %}
+
+        <input type="hidden" name="status" value="new" id="clip-tag-input" />
+
+        <input type="hidden" name="type" value="1" />
+
+        <div class="mb-4">
+          <label for="clip-source-label-input" class="form-label"><i class="bx bxs-label me-1"></i>Source Label</label>
+
+          <input type="text" name="source-label" class="form-control ext-clean" placeholder="Label for this data source" id="clip-source-label-input" required />
+
+          <span class="form-text">Use a descriptive label</span>
+        </div>
+
+        <div class="mb-4">
+          <div class="d-flex justify-content-end">
+            <button class="btn btn-secondary btn-sm paste-trigger" type="button" data-paste-area="#clip-data-input"><i class="bi bi-clipboard-check-fill me-1"></i>Paste</button>
+          </div>
+
+          <label for="clip-data-input" class="form-label"><i class="bx bxs-data me-1"></i>Data</label>
+
+          <textarea class="form-control ext-clean" name="source-content" placeholder="Data from source" rows="7" id="clip-data-input" required></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end">
+          <button data-tippy-content="Save as Source" class="btn btn-soft-info" type="submit"><i class="bx bxs-save me-1"></i>Save Source</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <input type="hidden" data-base-url="{{ base_url }}" data-scrap-key="{{ scrap_key }}" data-uc-root="{{ api_url }}" data-uc-key="{{ api_key }}" id="ucfetch-meta-input" />
+
+  {% include 'shared/change-password.html' %}
+{% endblock %}
+
+{% block page_js %}
+  <script src="{% static 'conf/configure.js' %}"></script>
+
+  <script src="{% static 'stall/ucstall.js' %}"></script>
+
+  <script src="{% static 'site/js/uc-clip-tools.js' %}"></script>
+
+  <script src="{% static 'site/js/uc-ext.js' %}"></script>
+
+  <script src="{% static 'site/js/uc-pre.js' %}"></script>
+
+  <script src="{% static 'site/js/uc-share.js' %}"></script>
+
+  <script>
+    var programsTable = new DataTable('#programs-table')
+    
+    var programsTable = new DataTable('#lectures-table')
+  </script>
+
+  {% if api_url and scrap_key %}
+    <script src="{% static 'site/js/ucfetch.js' %}"></script>
+
+    <script src="{% static 'site/js/cache-reload.js' %}"></script>
+  {% endif %}
+{% endblock %}

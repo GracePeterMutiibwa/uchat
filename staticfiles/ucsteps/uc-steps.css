@@ -1,0 +1,94 @@
+.ucc-steps-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 20px 0;
+  position: relative;
+}
+
+.ucc-step-wrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.ucc-step-wrapper:last-child {
+  flex: 0;
+}
+
+.ucc-step-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.ucc-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #71869d;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-bottom: 8px;
+  transition: background-color 0.3s ease;
+  position: relative;
+}
+
+.ucc-step-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.ucc-connector {
+  flex: 1;
+  height: 2px;
+  background-color: #e0e0e0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure connector passes through the middle of nodes */
+.ucc-step-wrapper {
+  position: relative;
+}
+
+.ucc-step-wrapper:not(:last-child) .ucc-connector {
+  position: absolute;
+  top: 20px; /* Half of circle height */
+  left: 40px; /* Circle width */
+  width: calc(100% - 40px);
+  z-index: 1;
+}
+
+/* Responsive styles */
+@media (max-width: 576px) {
+  .ucc-step-label {
+    display: none;
+  }
+
+  .ucc-steps-container {
+    padding: 10px 0;
+  }
+
+  .ucc-circle {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
+
+  .ucc-step-wrapper:not(:last-child) .ucc-connector {
+    top: 15px; /* Half of smaller circle height */
+    left: 30px; /* Smaller circle width */
+    width: calc(100% - 30px);
+  }
+}

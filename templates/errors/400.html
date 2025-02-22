@@ -1,0 +1,29 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 - Page Not Found | Uchat</title>
+
+    {% include 'shared/shared-meta.html' %}
+
+    <link rel="stylesheet" href="{% static 'public/css/e-400.css' %}" />
+  </head>
+  <body>
+    <div class="error-container">
+      <i class="bx bx-ghost error-icon"></i>
+      <h1>404</h1>
+      <p>Oops! The page you're looking for seems to have wandered off into the digital wilderness. Don't worry, our rescue team is on it!</p>
+      <a href="{% url 'uc:home' %}" class="back-button">
+        <i class="bx bx-chevron-left"></i>
+        Back to Safety
+      </a>
+    </div>
+
+    <script src="{% static 'site/js/jquery.min.js' %}"></script>
+
+    {% include 'shared/tippy.html' %}
+  </body>
+</html>

@@ -1,0 +1,29 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>500 - Server Error | Uchat</title>
+
+    {% include 'shared/shared-meta.html' %}
+
+    <link rel="stylesheet" href="{% static 'public/css/e-500.css' %}" />
+  </head>
+  <body>
+    <div class="error-container">
+      <i class="bx bx-bug error-icon"></i>
+      <h1>500</h1>
+      <p>Uh oh! Our servers are taking an unexpected break. Our engineering team has been notified and is working to get things back to normal.</p>
+      <a href="{% url 'uc:home' %}" class="back-button">
+        <i class="bx bx-chevron-left"></i>
+        Back to Safety
+      </a>
+    </div>
+
+    <script src="{% static 'site/js/jquery.min.js' %}"></script>
+
+    {% include 'shared/tippy.html' %}
+  </body>
+</html>

@@ -1,0 +1,79 @@
+#canvas {
+  position: relative;
+  width: 100%;
+  height: inherit;
+  background: #fafafa;
+  margin: 0;
+  padding: 20px;
+  font-family: system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+}
+
+.node {
+  padding: 8px 16px !important;
+  border-radius: 4px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  position: absolute !important;
+  cursor: move !important;
+  user-select: none !important;
+  z-index: 2 !important;
+  color: white !important;
+}
+
+.data {
+  background: #00a6f4 !important;
+}
+
+.missing {
+  background: #71869d !important;
+}
+
+svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.connector {
+  stroke: #ccd;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  #canvas {
+    position: relative;
+    min-height: 400px;
+  }
+
+  .node {
+    position: absolute !important;
+    left: 25% !important;
+    transform: none !important;
+  }
+
+  /* First node */
+  .node:nth-child(2) {
+    top: 10px !important;
+  }
+
+  /* Second node */
+  .node:nth-child(3) {
+    top: 80px !important;
+  }
+
+  /* Third node */
+  .node:nth-child(4) {
+    top: 150px !important;
+  }
+
+  svg {
+    display: none;
+  }
+}
